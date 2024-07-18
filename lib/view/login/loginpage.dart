@@ -61,10 +61,10 @@ class _LoginPageState extends State<LoginPage> {
       print(e.message);
 
       // Show error message
-      if (e.code == 'user-not-found') {
+      if (e.code == 'invalid-email') {
         // Show error to user
         wrongEmailMessage();
-      } else if (e.code == 'wrong-password') {
+      } else if (e.code == 'invalid-credential') {
         // Show error to user
         wrongPasswordMessage();
       } else {
