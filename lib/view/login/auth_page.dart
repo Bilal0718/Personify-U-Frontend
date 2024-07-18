@@ -5,24 +5,25 @@ import 'package:personifyu/view/login/welcome_view.dart';
 
 
 class AuthPage extends StatelessWidget {
-  const AuthPage({Key? key}) : super(key: key);
+  const AuthPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {          
-            if (snapshot.hasData && snapshot.data != null) {
-              // User is signed in
-              return HomePage();
-            } else {
-              // User is not signed in
-              return const WelcomeView();
-            }
+        builder: (context, snapshot) {
+          // user is logged in
+          if (snapshot.hasData) {
+            return HomePage();
+          }
+
+          // user is NOT logged in
+          else {
+            return WelcomeView();
+          }
         },
       ),
     );
   }
 }
-

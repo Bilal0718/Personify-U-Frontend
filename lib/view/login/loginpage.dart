@@ -3,6 +3,7 @@ import 'package:personifyu/common_widget/my_button.dart';
 import 'package:personifyu/common_widget/my_textfields.dart';
 import 'package:personifyu/common_widget/square_tile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:personifyu/view/home/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
@@ -18,55 +19,113 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   void signUserIn() async {
-
-    //show loading Circle
-    showDialog(context: context, builder: (context){
-      return Center(child: CircularProgressIndicator(),
-      );
-    },
-    barrierDismissible: false,
+    // Show loading circle
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+      barrierDismissible: false,
     );
-    //try sigin
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-    email: emailController.text,
-    password: passwordController.text,
 
-    
-    );
-    //pop the loading circle
-    Navigator.pop(context);
-    } on FirebaseAuthException catch (e) {
-      //pop the loading circle
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       Navigator.pop(context);
-      //WRONG EMAIL
-      if (e.code == 'user-not-found'){
-        //show error to user
-        wrongEmailMessage();
-      }
-      //WRONG PASSWORD
-      else if (e.code == 'wrong-password') {
-        //show error to user
-        wrongPasswordMessage();
-      }
-
+      // Show error message for empty fields
+      showErrorMessage("Email and Password cannot be empty");
+      return;
     }
 
+    // Try sign in
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
+      // Pop the loading circle
+      Navigator.pop(context);
+
+      // Navigate to HomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } on FirebaseAuthException catch (e) {
+      // Pop the loading circle
+      Navigator.pop(context);
+
+      // Print error to console for debugging
+      print('Failed with error code: ${e.code}');
+      print(e.message);
+
+      // Show error message
+      if (e.code == 'user-not-found') {
+        // Show error to user
+        wrongEmailMessage();
+      } else if (e.code == 'wrong-password') {
+        // Show error to user
+        wrongPasswordMessage();
+      } else {
+        // Show generic error message
+        showErrorMessage("Authentication failed. Please try again.");
+      }
+    }
   }
 
-  //wrong email message pop-up
-  void wrongEmailMessage(){
-    showDialog(context: context, builder: (context){
-      return const AlertDialog(title: Text('Incorrect Email'),);
-    });
+// Generic error message pop-up
+  void showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.deepPurple,
+          title: Center(
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  //wrong password message pop-up
-  void wrongPasswordMessage(){
-    showDialog(context: context, builder: (context){
-      return const AlertDialog(title: Text('Incorrect Password'),);
-    });
+// Wrong email message pop-up
+  void wrongEmailMessage() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.deepPurple,
+          title: Center(
+            child: Text(
+              'Incorrect Email',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+// Wrong password message pop-up
+  void wrongPasswordMessage() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.deepPurple,
+          title: Center(
+            child: Text(
+              'Incorrect Password',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -92,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: 200,
                       height: 200,
                     ),
-          
+
                     const SizedBox(
                       height: 10,
                     ),
@@ -158,7 +217,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             child: Text(
                               'Or continue with',
                               style: TextStyle(color: Colors.black),
@@ -179,9 +239,9 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         // google button
                         SquareTile(imagePath: 'assets/images/google.png'),
-          
+
                         SizedBox(width: 25),
-          
+
                         // apple button
                         SquareTile(imagePath: 'assets/images/apple.png'),
                       ],
@@ -191,14 +251,18 @@ class _LoginPageState extends State<LoginPage> {
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Not a ember?',
-                        style: TextStyle(color: Colors.black),),
-                        SizedBox(width: 4,),
+                        Text(
+                          'Not a ember?',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        SizedBox(
+                          width: 4,
+                        ),
                         Text('Register now',
-                        style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ))
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ))
                       ],
                     )
                   ],
