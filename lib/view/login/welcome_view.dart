@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:personifyu/view/login/loginpage.dart';
+import 'package:personifyu/view/login/login_or_register_page.dart';
 import '/common_widget/round_button.dart';
 
 class WelcomeView extends StatefulWidget {
@@ -87,7 +87,7 @@ class _WelcomeViewState extends State<WelcomeView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => LoginPage()));
+                                builder: (context) => LoginOrRegisterPage()));
                       }),
                 ),
                 const SizedBox(

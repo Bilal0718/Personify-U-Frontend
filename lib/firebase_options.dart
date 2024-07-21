@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'personifyu-5f48c.firebaseapp.com',
     storageBucket: 'personifyu-5f48c.appspot.com',
   );
+
 }
