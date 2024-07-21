@@ -7,8 +7,9 @@ class TColor {
   static Color get secondaryText => const Color(0xff828282);
   static Color get textTittle => const Color(0xff7C7C7C);
   static Color get placeholder => const Color(0xffB1B1B1);
-  static Color get darkGray => const Color(0xff4C4F4D);
+  static Color get OrangeTheme => const Color(0xffFE5600);
 }
+
 
 extension HexColor on Color {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
