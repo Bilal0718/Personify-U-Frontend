@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:personifyu/common_widget/my_button.dart';
@@ -5,6 +6,7 @@ import 'package:personifyu/common_widget/my_textfields.dart';
 import 'package:personifyu/common_widget/square_tile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:personifyu/view/home/home_page.dart';
+import 'package:personifyu/view/login/forgot_password.dart';
 
 class LoginPage extends StatefulWidget {
   final Function()? onTap;
@@ -187,14 +189,24 @@ class _LoginPageState extends State<LoginPage> {
                       height: 10,
                     ),
                     //forgot password
-                    const Padding(
+                    Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 25.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            'Forgot Password?',
-                            style: TextStyle(color: Colors.white),
+                          GestureDetector(
+                            onTap: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context){
+                                return ForgotPassword();
+                              }));
+                            },
+                            child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),

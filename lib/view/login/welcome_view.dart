@@ -72,6 +72,7 @@ class _WelcomeViewState extends State<WelcomeView> {
                             color: const Color(0xffFCFCFC).withOpacity(0.7),
                             fontSize: 14,
                             fontWeight: FontWeight.w600),
+                            textAlign: TextAlign.center,
                       ),
                     ],
                   ),

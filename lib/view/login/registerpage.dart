@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:personifyu/common_widget/my_button.dart';
 import 'package:personifyu/common_widget/my_textfields.dart';
@@ -31,6 +32,7 @@ class _RegisterPageState extends State<RegisterPage> {
       },
       barrierDismissible: false,
     );
+
     if (nameController.text.isEmpty) {
       //Show error message for Name
       Navigator.pop(context);
@@ -48,9 +50,21 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       //check if password is confirmed
       if (passwordController.text == confirmPasswordController.text) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailController.text.trim(),
           password: passwordController.text.trim(),
+        );
+
+        //add user details
+        addUserDetails(userCredential.user!.uid, nameController.text.trim(), emailController.text.trim());
+
+        // Pop the loading circle
+        Navigator.pop(context);
+
+        // Navigate to HomePage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
         );
       } else {
         // show error message, passwords don't match
@@ -58,15 +72,6 @@ class _RegisterPageState extends State<RegisterPage> {
         showErrorMessage('Passwords don\'t match!');
         return;
       }
-
-      // Pop the loading circle
-      Navigator.pop(context);
-
-      // Navigate to HomePage
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
     } on FirebaseAuthException catch (e) {
       // Pop the loading circle
       Navigator.pop(context);
@@ -89,7 +94,14 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-// Generic error message pop-up
+  Future addUserDetails(String uid, String name, String email) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'Name': name,
+      'Email': email,
+    });
+  }
+
+  // Generic error message pop-up
   void showErrorMessage(String message) {
     showDialog(
       context: context,
@@ -107,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-// Wrong email message pop-up
+  // Wrong email message pop-up
   void wrongEmailMessage() {
     showDialog(
       context: context,
@@ -125,7 +137,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-// Wrong password message pop-up
+  // Wrong password message pop-up
   void wrongPasswordMessage() {
     showDialog(
       context: context,
@@ -147,11 +159,16 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     var media = MediaQuery.sizeOf(context);
     return Scaffold(
-        backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-          child: Stack(children: [
-            Image.asset('assets/images/background.png',
-                width: media.width, height: media.height, fit: BoxFit.cover),
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Image.asset(
+              'assets/images/background.png',
+              width: media.width,
+              height: media.height,
+              fit: BoxFit.cover,
+            ),
             SafeArea(
               child: Center(
                 child: Column(
@@ -166,7 +183,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       width: 150,
                       height: 150,
                     ),
-
                     const SizedBox(
                       height: 10,
                     ),
@@ -227,7 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     //or continue with
                     const Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      padding: EdgeInsets.symmetric(horizontal: 25.0),
                       child: Row(
                         children: [
                           Expanded(
@@ -237,8 +253,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            padding: EdgeInsets.symmetric(horizontal: 10.0),
                             child: Text(
                               'Or continue with',
                               style: TextStyle(color: Colors.black),
@@ -259,9 +274,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         // google button
                         SquareTile(imagePath: 'assets/images/google.png'),
-
                         SizedBox(width: 25),
-
                         // apple button
                         SquareTile(imagePath: 'assets/images/apple.png'),
                       ],
@@ -280,11 +293,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         GestureDetector(
                           onTap: widget.onTap,
-                          child: Text('Login now',
-                              style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                              )),
+                          child: Text(
+                            'Login now',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     )
@@ -292,7 +307,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
             )
-          ]),
-        ));
+          ],
+        ),
+      ),
+    );
   }
 }
