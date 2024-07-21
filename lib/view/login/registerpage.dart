@@ -16,8 +16,9 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   //text editing controllers
   final emailController = TextEditingController();
-
+  final nameController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   void signUserUp() async {
     // Show loading circle
@@ -30,7 +31,12 @@ class _RegisterPageState extends State<RegisterPage> {
       },
       barrierDismissible: false,
     );
-
+    if (nameController.text.isEmpty) {
+      //Show error message for Name
+      Navigator.pop(context);
+      showErrorMessage('Name cannot be empty');
+      return;
+    }
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       Navigator.pop(context);
       // Show error message for empty fields
@@ -40,10 +46,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
     // Try creating the user
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+      //check if password is confirmed
+      if (passwordController.text == confirmPasswordController.text) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        );
+      } else {
+        // show error message, passwords don't match
+        Navigator.pop(context);
+        showErrorMessage('Passwords don\'t match!');
+        return;
+      }
 
       // Pop the loading circle
       Navigator.pop(context);
@@ -168,7 +182,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       height: 25,
                     ),
                     MyTextField(
-                      controller: emailController,
+                      controller: nameController,
                       hintText: 'Name',
                       obscureText: false,
                     ),
@@ -195,7 +209,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     //confirm password textfield
                     MyTextField(
-                      controller: passwordController,
+                      controller: confirmPasswordController,
                       hintText: 'Confirm Password',
                       obscureText: true,
                     ),
@@ -203,25 +217,11 @@ class _RegisterPageState extends State<RegisterPage> {
                       height: 10,
                     ),
                     //forgot password
-                    const Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Forgot Password?',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
                     const SizedBox(
                       height: 25,
                     ),
                     //signin buttin
-                    MyButton(
-                      text: "Sign Up",
-                      onTap: signUserUp),
+                    MyButton(text: "Sign Up", onTap: signUserUp),
                     const SizedBox(
                       height: 25,
                     ),
