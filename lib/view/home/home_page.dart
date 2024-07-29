@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:personifyu/common/color_extension.dart';
+import 'package:personifyu/common_widget/my_button.dart';
 import 'package:personifyu/view/home/career_search.dart';
+import 'package:personifyu/view/home/chat_page.dart';
 import 'package:personifyu/view/home/profile.dart';
 import 'package:personifyu/view/login/login_or_register_page.dart';
 
@@ -15,26 +17,22 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final User? user = FirebaseAuth.instance.currentUser;
-  void navigationToPages(index){
-    if (index ==0){
-      Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => HomePage()),
-  );
-    }else if(index == 1){
-      Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => CareerSearch()),
-  );
+  int _selectedIndex = 0;
+  final PageController _pageController = PageController();
 
-    }else if(index == 2){
-      Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => Profile()),
-  );
+  void navigationToPages(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController.jumpToPage(index);
   }
-  } 
 
+  void ChatRoute() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ChatPage()),
+    );
+  }
 
   // Sign user out method
   void signUserOut(BuildContext context) async {
@@ -48,7 +46,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home Page'),
         actions: [
           IconButton(
             onPressed: () => signUserOut(context),
@@ -56,8 +53,26 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Center(
-        child: Text('LOGGED IN AS: ${user?.email ?? 'Unknown'}'),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('LOGGED IN AS: ${user?.email ?? 'Unknown'}'),
+                MyButton(text: "Chat", onTap: ChatRoute),
+              ],
+            ),
+          ),
+          CareerSearch(),
+          ProfilePage(),
+        ],
       ),
       bottomNavigationBar: Container(
         color: TColor.OrangeTheme,
@@ -65,7 +80,7 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 20),
           child: GNav(
             backgroundColor: TColor.OrangeTheme,
-            tabBorderRadius:  100.0,
+            tabBorderRadius: 100.0,
             duration: Duration(milliseconds: 300),
             color: Colors.white,
             activeColor: Colors.white,
@@ -73,14 +88,22 @@ class _HomePageState extends State<HomePage> {
             padding: EdgeInsets.all(16),
             gap: 8,
             onTabChange: navigationToPages,
-            tabs: [GButton(icon: Icons.home,
-            text: 'Home',),
-            GButton(icon: Icons.person_search,
-            text: 'Career Search',),
-            GButton(icon: Icons.account_circle,
-            text: 'Profile',),
-            ]
-            ),
+            selectedIndex: _selectedIndex,
+            tabs: [
+              GButton(
+                icon: Icons.home,
+                text: 'Home',
+              ),
+              GButton(
+                icon: Icons.person_search,
+                text: 'Career Search',
+              ),
+              GButton(
+                icon: Icons.account_circle,
+                text: 'Profile',
+              ),
+            ],
+          ),
         ),
       ),
     );
