@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -43,12 +44,27 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _pickImage() async {
-    var status = await Permission.photos.status;
-    if (!status.isGranted) {
-      await Permission.photos.request();
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt <= 32) {
+        var status = await Permission.storage.status;
+        if (!status.isGranted) {
+          await Permission.storage.request();
+        }
+      } else {
+        var status = await Permission.photos.status;
+        if (!status.isGranted) {
+          await Permission.photos.request();
+        }
+      }
+    } else {
+      var status = await Permission.photos.status;
+      if (!status.isGranted) {
+        await Permission.photos.request();
+      }
     }
 
-    if (await Permission.photos.isGranted) {
+    if (await Permission.photos.isGranted || await Permission.storage.isGranted) {
       final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
         setState(() {
@@ -109,6 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 CircleAvatar(
                   radius: 50,
+                  backgroundImage: _profilePictureUrl != null ? NetworkImage(_profilePictureUrl!) : null,
                   child: _profilePictureUrl == null && _image == null
                       ? Icon(Icons.person, size: 50)
                       : null,
