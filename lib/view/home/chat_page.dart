@@ -70,10 +70,10 @@ class _ChatPageState extends State<ChatPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          "Bilal's Ai",
-          style: TextStyle(color: Colors.white),
+          "Personality Analysis",
+          style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
       ),
       body: Column(
         children: [

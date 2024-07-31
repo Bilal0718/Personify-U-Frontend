@@ -25,7 +25,7 @@ class _CareerSearchState extends State<CareerSearch> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Career Search Page'),
+        title: Text('Career Recommendation'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
