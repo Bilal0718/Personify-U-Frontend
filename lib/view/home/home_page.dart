@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
   void ChatRoute() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ChatPage()),
+      MaterialPageRoute(builder: (context) => ChatPage(title: 'Personality Analysis')),
     );
   }
 

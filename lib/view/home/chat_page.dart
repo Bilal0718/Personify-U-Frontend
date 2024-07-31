@@ -1,31 +1,42 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:personifyu/common_widget/chat_bubble.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  const ChatPage({super.key, required this.title});
+
+  final String title;
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
-const String _apiKey =
-    "AIzaSyCUOM5lByQm1Khn6MYbzAg-iR2fFxg5atw";
-
 class _ChatPageState extends State<ChatPage> {
-  late final GenerativeModel _model;
-  late final ChatSession _chat;
-  final ScrollController _scrollController = ScrollController();
+  final WebSocketChannel _channel = WebSocketChannel.connect(
+    Uri.parse('ws://10.0.2.2:8000/sendMessage'),
+  );
   final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
   bool _isSending = false;
-  
+
   @override
   void initState() {
     super.initState();
-    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: _apiKey);
-    _chat = _model.startChat();
+    _channel.stream.listen(
+      (message) {
+        setState(() {
+          _messages.add(ChatMessage(text: message, isUser: false));
+          _scrollDown();
+        });
+      },
+      onError: (error) {
+        print('WebSocket error: $error');
+      },
+      onDone: () {
+        print('WebSocket closed');
+      },
+    );
   }
 
   void _scrollDown() {
@@ -47,13 +58,9 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     try {
-      final response = await _chat.sendMessage(Content.text(message));
-      final text = response.text;
-      setState(() {
-        _messages.add(ChatMessage(text: text ?? "No response", isUser: false));
-        _scrollDown();
-      });
+      _channel.sink.add(message);
     } catch (e) {
+      print('Send error: $e');
       setState(() {
         _messages.add(ChatMessage(text: "Error Occurred", isUser: false));
       });
@@ -64,16 +71,22 @@ class _ChatPageState extends State<ChatPage> {
       _textController.clear();
     }
   }
+
+  @override
+  void dispose() {
+    _channel.sink.close();
+    _textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          "Personality Analysis",
-          style: TextStyle(color: Colors.black),
-        ),
+        title: Text(widget.title),
         backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
       ),
       body: Column(
         children: [
@@ -113,8 +126,7 @@ class _ChatPageState extends State<ChatPage> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(
-                            color:
-                                Color(0xFf25D366)), // Border color when focused
+                            color: Color(0xFf25D366)), // Border color when focused
                       ),
                     ),
                   ),
@@ -129,6 +141,52 @@ class _ChatPageState extends State<ChatPage> {
               ],
             ),
           )
+        ],
+      ),
+    );
+  }
+}
+
+class ChatMessage {
+  final String text;
+  final bool isUser;
+
+  ChatMessage({required this.text, required this.isUser});
+}
+
+class ChatBubble extends StatelessWidget {
+  final ChatMessage message;
+
+  const ChatBubble({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!message.isUser) ...[
+            CircleAvatar(child: Text('A')),
+            SizedBox(width: 10),
+          ],
+          Flexible(
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              decoration: BoxDecoration(
+                color: message.isUser ? Colors.blue : Colors.grey,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Text(
+                message.text,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          if (message.isUser) ...[
+            SizedBox(width: 10),
+            CircleAvatar(child: Text('U')),
+          ],
         ],
       ),
     );
